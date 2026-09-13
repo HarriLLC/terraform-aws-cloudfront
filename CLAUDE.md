@@ -1,4 +1,7 @@
-# terraform-aws-cloudfront
+# CLAUDE.md
+
+`terraform-aws-cloudfront` — a reusable Harri Terraform **module**, published
+to the HCP private registry and consumed by exact pinned version.
 
 Harri's fork of `terraform-aws-modules/cloudfront`, republished to the HCP
 private registry. Upstream structure and inputs are kept; Harri consumers drive
