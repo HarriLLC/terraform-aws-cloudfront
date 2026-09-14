@@ -25,7 +25,7 @@ it from `TerraformCloudFront/common/distributions`.
 ```hcl
 module "cloudfront" {
   source  = "app.terraform.io/harri/cloudfront/aws"
-  version = "1.0.0"
+  version = "x.y.z"   # pin the current published version
 
   # no required inputs — set at least these in practice
   aliases                = ["assets.harriprep.com"]
@@ -35,15 +35,16 @@ module "cloudfront" {
 }
 ```
 
+> Take the current published version from the HCP private registry, or from the
+> `version` pinned beside this `source` in a consumer's `common/resources.tf`.
+> Consumers pin an exact version; ranges are never allowed.
+
 ## Required Versions
 
-| Component | Constraint |
-|---|---|
-| Terraform | `>= 0.13.1` |
-| AWS provider | `>= 5.12.0` |
-
-Source of truth: `versions.tf`. The provider constraint is intentionally a
-range so each consumer can pin an exact version.
+Read them from **`versions.tf`**: `required_version` for Terraform core, and each
+`required_providers` entry for the providers. They are not repeated here, so this
+guide cannot go stale when they change. A module's provider constraint is
+intentionally a range, so consumers can pin an exact version themselves.
 
 ## File Layout
 
@@ -107,14 +108,6 @@ terraform-aws-cloudfront/
 - `examples/complete` — distribution with S3 and custom origins, OAC, custom
   error responses, logging, and an ACM certificate.
 
-## Validate Changes Locally
-
-- Run `terraform fmt` before opening a PR (always — CI may fail otherwise).
-- From the module dir: `terraform init -upgrade=false`.
-- Run `terraform validate`.
-- **Do not run `terraform plan` or `terraform apply` locally** — modules
-  don't hold state on their own; that happens in the consumer stack.
-
 ## Publishing a New Version
 
 1. Make the changes; run `terraform fmt` + `terraform validate` (and
@@ -125,13 +118,13 @@ terraform-aws-cloudfront/
 3. Update `README.md` (and `CHANGELOG.md` if the module keeps one).
 4. Tag and push **that one tag**: `git tag vX.Y.Z && git push origin vX.Y.Z`.
 5. HCP Registry auto-publishes from the tag; bump consumers' `version` pins to
-   the exact, `v`-stripped value (`3.1.0`, not `v3.1.0`).
+   the exact, `v`-stripped value (`X.Y.Z`, not `vX.Y.Z`).
 
 ## Conventions & Naming
 
-House style and module conventions load automatically from the
-`harri-tf-house-style` and `harri-tf-modules` rules whenever a `.tf` file in this
-module is edited — they are not repeated here.
+House style, module conventions, the local validate flow and the publish rules
+all load automatically from the `harri-tf-house-style` and `harri-tf-modules`
+rules whenever a `.tf` file in this module is edited — they are not repeated here.
 
 ### Project naming patterns
 
@@ -140,5 +133,6 @@ module is edited — they are not repeated here.
 - `origin_access_control` defaults to a single `s3` entry; set
   `create_origin_access_control = true` to materialise it.
 - Prefer OAC (`origin_access_control`) over the legacy OAI for S3 origins.
-- TerraformCloudFront pins `1.0.0`; upstream tags (`v6.x`) do not correspond to
-  the Harri registry versions.
+- TerraformCloudFront is the consumer; it pins its exact version beside the
+  `source` in its own config. Upstream tags do not correspond to the Harri
+  registry versions.
